@@ -1,0 +1,11 @@
+{
+  "name": "leetcode-cpp",
+  "version": "1.0.0",
+  "description": "LeetCode solutions in C++, organized topic-wise",
+  "scripts": {
+    "format": "find . -type f \\( -name '*.cpp' -o -name '*.h' \\) -print0 | xargs -0 -r clang-format -i",
+    "run": "g++ -std=c++17 -Wall -O2 test.cpp -o bin/output && ./bin/output"
+  },
+  "author": "Shaikh Unais",
+  "license": "MIT"
+}
