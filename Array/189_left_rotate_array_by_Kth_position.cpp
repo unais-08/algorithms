@@ -1,11 +1,11 @@
 #include <bits/stdc++.h>
 using namespace std;
-// TC O(n)+O(k)
-// SC O(1)
 
 class Solution {
+    // TC O(n)+O(k)
+    // SC O(1)
    public:
-    void leftRotateByKthPlace(int* nums, int n, int d) {
+    void bruteForce(int* nums, int n, int d) {
         int k = d % n;
         // Extracting first K elements
         int temp[k];
@@ -25,6 +25,23 @@ class Solution {
             nums[i] = temp[i - (n - k)];
         }
     }
+
+    /*
+        TC O(n)
+        O(d)+O(n−d)+O(n)
+        O(2n)=O(n)
+    */
+    // SC O(1)
+    void leftRotateByKthPlace(int* nums, int n, int d) {
+        reverse(nums, nums + d);
+        reverse(nums + d, nums + n);
+        reverse(nums, nums + n);
+    }
+    void rightRotateByKthPlace(int* nums, int n, int d) {
+        reverse(nums, nums + n);
+        reverse(nums, nums + d);
+        reverse(nums + d, nums + n);
+    }
 };
 
 int main() {
@@ -37,6 +54,7 @@ int main() {
     }
     cout << endl;
     s.leftRotateByKthPlace(nums, n, 4);
+    // s.rightRotateByKthPlace(nums,n,4);
     for (int i = 0; i < n; i++) {
         cout << nums[i] << " ";
     }
