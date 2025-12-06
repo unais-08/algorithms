@@ -9,52 +9,72 @@ class Node {
   Node(int val) : data(val), next(nullptr) {}
 };
 
-class LinkedList {
+class CircularLinkedList {
  private:
   Node* head;
   Node* tail;
   int length;
 
  public:
-  LinkedList(int val) {
+  CircularLinkedList(int val) {
     head = new Node(val);
     tail = head;
+    head->next = head;  // circle
     length = 1;
   }
 
-  // ------- Basic Insertions ---------
-
+  // ---------------- Append ----------------
   void append(int data) {
     Node* newNode = new Node(data);
-    tail->next = newNode;
-    tail = newNode;
+
+    if (length == 0) {
+      head = tail = newNode;
+      newNode->next = newNode;
+    } else {
+      newNode->next = head;
+      tail->next = newNode;
+      tail = newNode;
+    }
     length++;
   }
 
+  // ---------------- Prepend ----------------
   void prepend(int data) {
     Node* newNode = new Node(data);
-    newNode->next = head;
-    head = newNode;
-    if (length == 0) tail = newNode;
+
+    if (length == 0) {
+      head = tail = newNode;
+      newNode->next = newNode;
+    } else {
+      newNode->next = head;
+      head = newNode;
+      tail->next = head;
+    }
     length++;
   }
 
-  // -------- Delete Operations ---------
-
+  // ---------------- Delete Head ----------------
   void deleteHead() {
     if (length == 0) return;
 
+    if (length == 1) {
+      delete head;
+      head = tail = nullptr;
+      length = 0;
+      return;
+    }
+
     Node* temp = head;
     head = head->next;
+    tail->next = head;
     delete temp;
-
     length--;
-
-    if (length == 0) tail = nullptr;  // list became empty
   }
 
+  // ---------------- Delete Tail ----------------
   void deleteTail() {
     if (length == 0) return;
+
     if (length == 1) {
       delete head;
       head = tail = nullptr;
@@ -66,12 +86,14 @@ class LinkedList {
     while (temp->next != tail) {
       temp = temp->next;
     }
+
+    temp->next = head;
     delete tail;
     tail = temp;
-    tail->next = nullptr;
     length--;
   }
 
+  // ---------------- Delete Index ----------------
   bool deleteIndex(int pos) {
     if (pos < 0 || pos >= length) {
       cout << "Invalid Index\n";
@@ -90,19 +112,18 @@ class LinkedList {
 
     Node* temp = head;
     for (int i = 0; i < pos - 1; i++) {
-      // To get the pointer of the element 1 pre to target
       temp = temp->next;
     }
 
     Node* toDelete = temp->next;
     temp->next = toDelete->next;
+
     delete toDelete;
     length--;
     return true;
   }
 
-  // -------- Insert at Index ---------
-
+  // ---------------- Insert at index ----------------
   void insert(int data, int pos) {
     if (pos < 0 || pos > length) {
       cout << "Invalid Index\n";
@@ -128,65 +149,61 @@ class LinkedList {
 
     newNode->next = temp->next;
     temp->next = newNode;
+
     length++;
   }
 
-  // --------- Utility Methods ----------
+  // ---------------- Print ----------------
+  void print() {
+    if (length == 0) {
+      cout << "Empty\n";
+      return;
+    }
 
-  int getLength() const { return length; }
-
-  void print() const {
     Node* temp = head;
-    while (temp) {
+
+    do {
       cout << temp->data << " ";
       temp = temp->next;
-    }
+    } while (temp != head);
+
     cout << endl;
   }
 
-  Node* getHead() const { return head; }
-  Node* getTail() const { return tail; }
+  int getLength() const { return length; }
 
-  void construct_linked_list() {
-    int input_data;
-    Node* temp = this->head;
-    cout << "Note: Give -1 in input to terminate linkedlist construction"
-         << endl;
-    while (true) {
-      cout << "Enter the value after " << temp->data << ": ";
-      cin >> input_data;
-      if (input_data == -1) break;
-      temp->next = new Node(input_data);
-      length++;
-      temp = temp->next;
-    }
-    tail = temp;
-    return;
-  }
-  // -------- Destructor ---------
+  // ---------------- Destructor ----------------
+  ~CircularLinkedList() {
+    if (length == 0) return;
 
-  ~LinkedList() {
     Node* temp = head;
-    while (temp) {
-      Node* nxt = temp->next;
+    do {
+      Node* nextNode = temp->next;
       delete temp;
-      temp = nxt;
-    }
+      temp = nextNode;
+    } while (temp != head);
+
     head = tail = nullptr;
     length = 0;
   }
 };
 
 int main() {
-  LinkedList list(10);
+  CircularLinkedList cll(10);
 
-  list.prepend(5);
-  list.append(15);
-  list.insert(100, 1);
-  list.print();
-  list.deleteIndex(2);
-  list.construct_linked_list();
-  list.print();
+  cll.append(20);
+  cll.append(30);
+  cll.prepend(5);
+
+  cll.insert(100, 2);
+
+  cll.print();
+
+  cll.deleteIndex(3);
+  cll.print();
+
+  cll.deleteHead();
+  cll.print();
 
   return 0;
 }
