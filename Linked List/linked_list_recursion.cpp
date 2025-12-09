@@ -51,6 +51,7 @@ int main() {
 
   // Print the linked list
   printLL(head);
+  list<int> myls;
 
   return 0;
 }
