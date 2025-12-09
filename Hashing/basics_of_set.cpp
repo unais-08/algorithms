@@ -8,8 +8,8 @@ using namespace std;
 
 int main() {
   // ---------- DECLARATION ----------
-  set<int> s;  // sorted, unique
-
+  set<int> s;             // sorted, unique
+  unordered_set<int> us;  // unique but not sorted, avg TC O(1)
   // ---------- INSERT ----------
   s.insert(10);
   s.insert(5);
