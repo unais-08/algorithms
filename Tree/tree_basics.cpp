@@ -7,7 +7,6 @@ class Node {
   Node* right;
   Node* left;
 
- public:
   Node(int data) : data(data), right(nullptr), left(nullptr) {}
 };
 
@@ -29,8 +28,10 @@ class BinaryTree {
 
  public:
   Node* getRoot() { return root; }
+
+  // Level-order construction using -1 as null indicator
   void construct_bt() {
-    if (root == nullptr) {
+    if (!root) {
       int rv = getInput("Enter root value: ");
       if (rv == -1) return;
       root = new Node(rv);
@@ -44,14 +45,12 @@ class BinaryTree {
       q.pop();
 
       int l = getInput("Left of " + to_string(curr->data) + ": ");
-
       if (l != -1) {
         curr->left = new Node(l);
         q.push(curr->left);
       }
 
       int r = getInput("Right of " + to_string(curr->data) + ": ");
-
       if (r != -1) {
         curr->right = new Node(r);
         q.push(curr->right);
@@ -59,188 +58,208 @@ class BinaryTree {
     }
   }
 
-  // data processing at calling time
-  void pre_order(Node* root);
+  void pre_order(Node* root) {
+    if (root) {
+      cout << root->data << " ";
+      pre_order(root->left);
+      pre_order(root->right);
+    }
+  }
 
-  // data processing at returning time
-  void post_order(Node* root);
-  // data processing b/w calling time and returning time
-  void in_order(Node* root);
+  void in_order(Node* root) {
+    if (root) {
+      in_order(root->left);
+      cout << root->data << " ";
+      in_order(root->right);
+    }
+  }
 
-  void levelOrder();
+  void post_order(Node* root) {
+    if (root) {
+      post_order(root->left);
+      post_order(root->right);
+      cout << root->data << " ";
+    }
+  }
 
-  Node* buildTree();
+  void levelOrder() {
+    if (!root) return;
+    queue<Node*> q;
+    q.push(root);
 
-  void Ipreorder(vector<int>& preorder_sequence);
+    while (!q.empty()) {
+      Node* curr = q.front();
+      q.pop();
+      cout << curr->data << " ";
 
-  void Iinorder(vector<int>& inorder_sequence);
+      if (curr->left) q.push(curr->left);
+      if (curr->right) q.push(curr->right);
+    }
+  }
 
-  void Ipostorder(vector<int>& post);
+  // Iterative traversals
+  void Ipreorder(vector<int>& ans) {
+    if (!root) return;
+
+    stack<Node*> st;
+    st.push(root);
+
+    while (!st.empty()) {
+      Node* curr = st.top();
+      st.pop();
+
+      ans.push_back(curr->data);
+
+      if (curr->right) st.push(curr->right);
+      if (curr->left) st.push(curr->left);
+    }
+  }
+
+  void Iinorder(vector<int>& ans) {
+    stack<Node*> st;
+    Node* curr = root;
+
+    while (curr || !st.empty()) {
+      while (curr) {
+        st.push(curr);
+        curr = curr->left;
+      }
+
+      curr = st.top();
+      st.pop();
+
+      ans.push_back(curr->data);
+      curr = curr->right;
+    }
+  }
+
+  void Ipostorder(vector<int>& ans) {
+    if (!root) return;
+
+    stack<Node*> s1, s2;
+    s1.push(root);
+
+    while (!s1.empty()) {
+      Node* curr = s1.top();
+      s1.pop();
+
+      s2.push(curr);
+
+      if (curr->left) s1.push(curr->left);
+      if (curr->right) s1.push(curr->right);
+    }
+
+    while (!s2.empty()) {
+      ans.push_back(s2.top()->data);
+      s2.pop();
+    }
+  }
+
+  // Single-stack: Pre + In + Post in one traversal
+  void pre_in_post(vector<int>& pre, vector<int>& in, vector<int>& post) {
+    stack<pair<Node*, int>> st;
+    st.push({root, 1});
+
+    while (!st.empty()) {
+      auto it = st.top();
+      st.pop();
+
+      if (it.second == 1) {
+        pre.push_back(it.first->data);
+        // it.second++;
+        it.second = 2;
+        st.push(it);
+        if (it.first->left) st.push({it.first->left, 1});
+      }
+
+      else if (it.second == 2) {
+        in.push_back(it.first->data);
+        // it.second++;
+        it.second = 3;
+        st.push(it);
+        if (it.first->right) st.push({it.first->right, 1});
+      }
+
+      else {
+        post.push_back(it.first->data);
+      }
+    }
+  }
+
+  // Hardcoded demo tree
+  Node* buildTree() {
+    root = new Node(10);
+    root->left = new Node(5);
+    root->right = new Node(20);
+
+    root->left->left = new Node(3);
+    root->left->right = new Node(8);
+
+    root->right->right = new Node(25);
+
+    return root;
+  }
 };
+
 int main() {
   cout << "==============================" << endl;
   cout << "   Tree Data Structure Demo   " << endl;
   cout << "==============================" << endl;
 
-  BinaryTree* bt = new BinaryTree();
-  // cout << "\nConstructing Binary Tree..." << endl;
-  // bt->construct_bt();
-  bt->buildTree();
+  BinaryTree bt;
+  bt.buildTree();
 
-  cout << "\nTraversal Outputs:" << endl;
+  cout << "\nLevel Order       : ";
+  bt.levelOrder();
+  cout << "\n";
 
-  cout << "------------------------------" << endl;
-  cout << "Level Order Traversal: ";
-  bt->levelOrder();
-  cout << endl;
-  cout << endl;
+  cout << "Preorder (Rec)    : ";
+  bt.pre_order(bt.getRoot());
+  cout << "\n";
 
-  cout << "Preorder Traversal (Recursive): ";
-  bt->pre_order(bt->getRoot());
-  cout << endl;
+  vector<int> preIt, inIt, postIt;
+  bt.Ipreorder(preIt);
+  bt.Iinorder(inIt);
+  bt.Ipostorder(postIt);
 
-  vector<int> preorder_sequence;
-  bt->Ipreorder(preorder_sequence);
-  cout << "Preorder Traversal (Iterative): ";
-  for (int val : preorder_sequence) cout << val << " ";
-  cout << endl;
-  cout << endl;
+  cout << "Preorder (Itr)    : ";
+  for (int x : preIt) cout << x << " ";
+  cout << "\n";
 
-  cout << "Inorder Traversal (Recursive): ";
-  bt->in_order(bt->getRoot());
-  cout << endl;
+  cout << "Inorder  (Rec)    : ";
+  bt.in_order(bt.getRoot());
+  cout << "\n";
 
-  vector<int> inorder_sequence;
-  bt->Iinorder(inorder_sequence);
-  cout << "Inorder Traversal (Iterative): ";
-  for (int val : inorder_sequence) cout << val << " ";
-  cout << endl;
-  cout << endl;
+  cout << "Inorder  (Itr)    : ";
+  for (int x : inIt) cout << x << " ";
+  cout << "\n";
 
-  cout << "Postorder Traversal (Recursive): ";
-  bt->post_order(bt->getRoot());
-  cout << endl;
+  cout << "Postorder (Rec)   : ";
+  bt.post_order(bt.getRoot());
+  cout << "\n";
 
-  vector<int> postorder_sequence;
-  bt->Ipostorder(postorder_sequence);
-  cout << "Postorder Traversal (Iterative): ";
-  for (int val : postorder_sequence) cout << val << " ";
-  cout << endl;
+  cout << "Postorder (Itr)   : ";
+  for (int x : postIt) cout << x << " ";
+  cout << "\n\n";
+
+  vector<int> pre, in, post;
+  bt.pre_in_post(pre, in, post);
+
+  cout << "Combined Preorder : ";
+  for (int x : pre) cout << x << " ";
+  cout << "\n";
+
+  cout << "Combined Inorder  : ";
+  for (int x : in) cout << x << " ";
+  cout << "\n";
+
+  cout << "Combined Postorder: ";
+  for (int x : post) cout << x << " ";
+  cout << "\n";
 
   cout << "==============================" << endl;
   cout << "        Program Ended         " << endl;
   cout << "==============================" << endl;
 
-  delete bt;
   return 0;
-}
-
-void BinaryTree::pre_order(Node* root) {
-  if (root) {
-    cout << root->data << " ";
-    pre_order(root->left);
-    pre_order(root->right);
-  }
-  return;
-}
-
-void BinaryTree::post_order(Node* root) {
-  if (root) {
-    post_order(root->left);
-    post_order(root->right);
-    cout << root->data << " ";
-  }
-  return;
-}
-
-void BinaryTree::in_order(Node* root) {
-  if (root) {
-    in_order(root->left);
-    cout << root->data << " ";
-    in_order(root->right);
-  }
-  return;
-}
-
-void BinaryTree::Ipreorder(vector<int>& preorder_sequence) {
-  if (!root) return;
-
-  stack<Node*> st;
-  st.push(root);
-
-  while (!st.empty()) {
-    Node* curr = st.top();  // use local var
-    st.pop();
-
-    preorder_sequence.push_back(curr->data);
-
-    if (curr->right) st.push(curr->right);
-    if (curr->left) st.push(curr->left);
-  }
-}
-
-void BinaryTree::Iinorder(vector<int>& inorder_sequence) {
-  stack<Node*> st;
-  Node* curr = root;
-  while (curr || !st.empty()) {
-    while (curr) {
-      st.push(curr);
-      curr = curr->left;
-    }
-    curr = st.top();
-    st.pop();
-
-    inorder_sequence.push_back(curr->data);
-
-    curr = curr->right;
-  }
-}
-
-void BinaryTree::Ipostorder(vector<int>& ans) {
-  if (!root) return;
-  stack<Node*> s1, s2;
-  s1.push(root);
-
-  while (!s1.empty()) {
-    root = s1.top();
-    s1.pop();
-
-    s2.push(root);
-
-    if (root->left) s1.push(root->left);
-    if (root->right) s1.push(root->right);
-  }
-  // Empty s2 after s1 is completely processed
-  while (!s2.empty()) {
-    ans.push_back(s2.top()->data);
-    s2.pop();
-  }
-}
-
-void BinaryTree::levelOrder() {
-  if (!this->root) return;
-  queue<Node*> q;
-  q.push(this->root);
-
-  while (!q.empty()) {
-    Node* curr = q.front();
-    q.pop();
-    cout << curr->data << " ";
-
-    if (curr->left) q.push(curr->left);
-    if (curr->right) q.push(curr->right);
-  }
-}
-// TREE
-Node* BinaryTree::buildTree() {
-  this->root = new Node(10);
-  root->left = new Node(5);
-  root->right = new Node(20);
-
-  root->left->left = new Node(3);
-  root->left->right = new Node(8);
-
-  root->right->right = new Node(25);
-
-  return root;
 }
