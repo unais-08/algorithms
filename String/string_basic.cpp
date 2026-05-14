@@ -18,6 +18,7 @@ int main() {
 
   college.push_back('s');                  // append single char → "Bombays"
   college.insert(college.size(), "tate");  // insert at end → "Bombaystate"
+  cout << college << endl;  // 
 
   reverse(college.begin(), college.end());  // reverse string
 
